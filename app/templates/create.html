@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить студента</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <div class="page">
+        <section class="form-card">
+            <div class="form-header">
+                <p class="hero-badge">Создание записи</p>
+                <h1>Добавить студента</h1>
+                <p class="hero-text">Заполните данные нового студента и сохраните запись.</p>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/students/create" class="student-form">
+                <div class="form-group">
+                    <label for="name">Имя</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value="{{ form_data.name }}"
+                        placeholder="Например: Иван Петров"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Возраст</label>
+                    <input
+                        type="number"
+                        id="age"
+                        name="age"
+                        min="14"
+                        max="120"
+                        value="{{ form_data.age }}"
+                        placeholder="Например: 19"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="group_name">Группа</label>
+                    <input
+                        type="text"
+                        id="group_name"
+                        name="group_name"
+                        value="{{ form_data.group_name }}"
+                        placeholder="Например: ИДБ-22-05"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Пол</label>
+                    <select id="gender" name="gender" required>
+                        <option value="" {% if not form_data.gender %}selected{% endif %}>Выберите пол</option>
+                        <option value="М" {% if form_data.gender == "М" %}selected{% endif %}>М</option>
+                        <option value="Ж" {% if form_data.gender == "Ж" %}selected{% endif %}>Ж</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <a class="btn btn-secondary" href="/">Назад</a>
+                    <button class="btn btn-primary" type="submit">Сохранить</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</body>
+</html>

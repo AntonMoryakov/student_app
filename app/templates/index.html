@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Студенты</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <div class="page">
+        <header class="hero">
+            <div>
+                <p class="hero-badge">CRUD · FastAPI · PostgreSQL · SQLAlchemy</p>
+                <h1>Система учета студентов</h1>
+                <p class="hero-text">
+                    Веб-приложение для добавления, просмотра, редактирования и удаления записей о студентах.
+                </p>
+            </div>
+
+            <a class="btn btn-primary" href="/students/create">Добавить студента</a>
+        </header>
+
+        <section class="card">
+            <div class="card-header">
+                <h2>Список студентов</h2>
+                <span class="counter">Всего: {{ students|length }}</span>
+            </div>
+
+            {% if students %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя</th>
+                            <th>Возраст</th>
+                            <th>Группа</th>
+                            <th>Пол</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.id }}</td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.age }}</td>
+                            <td>{{ student.group_name }}</td>
+                            <td>{{ student.gender }}</td>
+                            <td>
+                                <div class="actions">
+                                    <a class="btn btn-secondary btn-small" href="/students/edit/{{ student.id }}">
+                                        Редактировать
+                                    </a>
+                                    <form action="/students/delete/{{ student.id }}" method="post" onsubmit="return confirm('Удалить студента?');">
+                                        <button class="btn btn-danger btn-small" type="submit">
+                                            Удалить
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <h3>Список пока пуст</h3>
+                <p>Добавьте первого студента, чтобы начать работу с системой.</p>
+                <a class="btn btn-primary" href="/students/create">Создать запись</a>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</body>
+</html>
