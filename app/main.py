@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from app import models
 from app.crud import (
     create_student,
     delete_student,
@@ -14,8 +15,6 @@ from app.crud import (
     update_student,
 )
 from app.database import Base, engine, get_db
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Student Management App",
@@ -26,6 +25,11 @@ app = FastAPI(
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    Base.metadata.create_all(bind=engine)
 
 
 @app.get("/health", response_class=JSONResponse)
