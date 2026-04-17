@@ -14,7 +14,11 @@ engine = create_engine(
     poolclass=StaticPool,
 )
 
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+TestingSessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
 
 
 def override_get_db():
@@ -25,11 +29,7 @@ def override_get_db():
         db.close()
 
 
-Base.metadata.drop_all(bind=engine)
-Base.metadata.create_all(bind=engine)
-
 app.dependency_overrides[get_db] = override_get_db
-
 client = TestClient(app)
 
 
@@ -120,3 +120,83 @@ def test_delete_student():
 
     assert response.status_code == 200
     assert "Алексей Сидоров" not in response.text
+
+
+def test_create_student_with_empty_name_returns_400():
+    reset_database()
+
+    response = client.post(
+        "/students/create",
+        data={
+            "name": "   ",
+            "age": 19,
+            "group_name": "ИДБ-22-05",
+            "gender": "М",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 400
+    assert "Имя не может быть пустым." in response.text
+
+
+def test_create_student_with_invalid_gender_returns_400():
+    reset_database()
+
+    response = client.post(
+        "/students/create",
+        data={
+            "name": "Иван Петров",
+            "age": 19,
+            "group_name": "ИДБ-22-05",
+            "gender": "X",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 400
+    assert "Пол должен быть" in response.text
+
+
+def test_create_student_with_invalid_age_returns_400():
+    reset_database()
+
+    response = client.post(
+        "/students/create",
+        data={
+            "name": "Иван Петров",
+            "age": 10,
+            "group_name": "ИДБ-22-05",
+            "gender": "М",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 400
+    assert "Возраст должен быть в диапазоне" in response.text
+
+
+def test_edit_nonexistent_student_returns_404():
+    reset_database()
+
+    response = client.post(
+        "/students/edit/999",
+        data={
+            "name": "Тест",
+            "age": 20,
+            "group_name": "ИДБ-22-01",
+            "gender": "М",
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Студент не найден"
+
+
+def test_delete_nonexistent_student_returns_404():
+    reset_database()
+
+    response = client.post("/students/delete/999")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Студент не найден"
